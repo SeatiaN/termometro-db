@@ -12,20 +12,22 @@
     <p class="subtitulo">Temperatura hora a hora de cualquier ciudad</p>
 
     <div class="buscador">
-      <input type="text" id="input-ciudad" placeholder="Ciudad...">
+      <input type="text" id="input-ciudad" placeholder="Escribe una ciudad...">
       <button id="btn-buscar">Buscar</button>
     </div>
 
     <div id="estado"></div>
 
     <div id="resultado" hidden>
+      <p id="mensaje-guardado" class="mensaje-guardado" hidden>Ciudad guardada en tus favoritas</p>
       <h2 id="titulo-ciudad"></h2>
       <div id="grafico" class="grafico"></div>
+      <button id="btn-guardar" class="btn-guardar">Guardar esta ciudad</button>
     </div>
 
     <div class="seccion-favoritas">
       <h3>Mis ciudades favoritas</h3>
-      <ul id="lista-favoritas"></ul>
+      <div id="lista-favoritas" class="lista-favoritas"></div>
     </div>
   </div>
 

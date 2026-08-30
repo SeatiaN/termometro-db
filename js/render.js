@@ -5,24 +5,19 @@ export function pintarBoton(nombre, temperaturas) {
 
   if (!resultado || !tituloCiudad || !grafico) return;
 
-  // Insertar el nombre de la ciudad y el botón de guardar juntos
-  tituloCiudad.innerHTML = `
-    ${nombre}
-    <button id="btn-guardar" class="btn-guardar">Guardar esta ciudad</button>
-  `;
-
-  // Renderizar las barras de temperatura
+  tituloCiudad.textContent = nombre;
   grafico.innerHTML = '';
+
   temperaturas.forEach((temp, index) => {
     const barra = document.createElement('div');
     barra.className = 'barra';
 
     const hora = index < 10 ? `0${index}:00` : `${index}:00`;
-    const altura = (temp / 40) * 100; // Porcentaje según temperatura
+    const altura = (temp / 40) * 100;
 
     barra.innerHTML = `
       <div class="barra__valor">${Math.round(temp)}°</div>
-      <div class="barra__relleno" style="--altura: ${altura}%; --color: #eab308;"></div>
+      <div class="barra__relleno" style="--altura: ${altura}%;"></div>
       <div class="barra__hora">${hora}</div>
     `;
 
@@ -34,16 +29,12 @@ export function pintarBoton(nombre, temperaturas) {
 
 export function mostrarCargando(estado) {
   const divEstado = document.getElementById('estado');
-  if (divEstado) {
-    divEstado.textContent = estado ? 'Cargando datos...' : '';
-  }
+  if (divEstado) divEstado.textContent = estado ? 'Cargando datos...' : '';
 }
 
 export function mostrarError(mensaje) {
   const divEstado = document.getElementById('estado');
-  if (divEstado) {
-    divEstado.textContent = mensaje;
-  }
+  if (divEstado) divEstado.textContent = mensaje;
 }
 
 export function limpiarResultado() {

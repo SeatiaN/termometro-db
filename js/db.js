@@ -11,7 +11,8 @@ export async function guardarFavorito(ciudad) {
   if (error) {
     console.error('Error guardando en Supabase:', error);
   } else {
-    console.log('Ciudad guardada con éxito:', data);
+    const msg = document.getElementById('mensaje-guardado');
+    if (msg) msg.hidden = false;
   }
 }
 
@@ -28,9 +29,10 @@ export async function cargarFavoritos(elementolista) {
   if (elementolista) {
     elementolista.innerHTML = '';
     data.forEach((item) => {
-      const li = document.createElement('li');
-      li.textContent = item.nombre;
-      elementolista.appendChild(li);
+      const div = document.createElement('div');
+      div.className = 'tarjeta-favorita';
+      div.textContent = item.nombre;
+      elementolista.appendChild(div);
     });
   }
 }
