@@ -1,56 +1,78 @@
-import { buscarCiudad, obtenerTemperaturas } from './api.js';
-import { pintarBoton, mostrarCargando, mostrarError, limpiarResultado } from './render.js';
-import { guardarFavorito, cargarFavoritos } from './db.js';
+import { buscarCiudad, obtenerTemperaturas } from "./api.js";
+import { pintarGrafico, mostrarCargando, mostrarError, limpiarEstado } from "./render.js";
+import { guardarCiudad, cargarFavoritas } from "./db.js";
 
-const input = document.getElementById('input-ciudad');
-const btn = document.getElementById('btn-buscar');
-const listaFavoritas = document.getElementById('lista-favoritas');
+const $input = document.getElementById("input-ciudad");
+const $boton = document.getElementById("btn-buscar");
+const $botonGuardar = document.getElementById("btn-guardar");
+const $listaFavoritas = document.getElementById("lista-favoritas");
 
 let cargando = false;
 let ciudadActual = null;
 
 async function manejarBusqueda() {
-  const ciudad = input.value.trim();
-  if (!ciudad) return;
+  const consulta = $input.value.trim();
+
+  if (consulta === "") {
+    mostrarError("Escribe el nombre de una ciudad.");
+    return;
+  }
+
+  if (cargando) return;
 
   cargando = true;
-  mostrarCargando(true);
-  limpiarResultado();
+  $boton.disabled = true;
+  mostrarCargando(consulta);
 
   try {
-    const datosCiudad = await buscarCiudad(ciudad);
-    if (!datosCiudad) {
-      mostrarError('No se encontró la ciudad');
-      return;
-    }
+    const ciudad = await buscarCiudad(consulta);
+    const horas = await obtenerTemperaturas(ciudad.lat, ciudad.lon);
 
-    ciudadActual = datosCiudad;
-    const temperaturas = await obtenerTemperaturas(datosCiudad.lat, datosCiudad.lon);
-    pintarBoton(datosCiudad.nombre, temperaturas);
+    limpiarEstado();
+    pintarGrafico(ciudad, horas);
 
-    // Escuchar el clic del botón recién creado
-    const btnGuardar = document.getElementById('btn-guardar');
-    if (btnGuardar) {
-      btnGuardar.addEventListener('click', async () => {
-        if (ciudadActual) {
-          await guardarFavorito(ciudadActual);
-          if (listaFavoritas) cargarFavoritos(listaFavoritas);
-        }
-      });
-    }
+    ciudadActual = ciudad;
   } catch (error) {
-    mostrarError('Error al obtener los datos');
+    mostrarError(error.message);
+    console.error(error);
   } finally {
     cargando = false;
-    mostrarCargando(false);
+    $boton.disabled = false;
   }
 }
 
-btn.addEventListener('click', manejarBusqueda);
-input.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') manejarBusqueda();
+async function manejarGuardado() {
+  if (!ciudadActual) return;
+
+  try {
+    await guardarCiudad(ciudadActual.nombre, ciudadActual.lat, ciudadActual.lon);
+    await mostrarFavoritas();
+  } catch (error) {
+    mostrarError(error.message);
+    console.error(error);
+  }
+}
+
+async function mostrarFavoritas() {
+  try {
+    const favoritas = await cargarFavoritas();
+
+    $listaFavoritas.innerHTML = favoritas
+      .map((ciudad) => `<li>${ciudad.nombre}</li>`)
+      .join("");
+  } catch (error) {
+    mostrarError(error.message);
+    console.error(error);
+  }
+}
+
+$boton.addEventListener("click", manejarBusqueda);
+$botonGuardar.addEventListener("click", manejarGuardado);
+
+$input.addEventListener("keydown", (evento) => {
+  if (evento.key === "Enter") manejarBusqueda();
 });
 
-if (listaFavoritas) {
-  cargarFavoritos(listaFavoritas);
-}
+$input.value = "Málaga";
+manejarBusqueda();
+mostrarFavoritas();
