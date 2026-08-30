@@ -1,63 +1,59 @@
-import { buscarCiudad, obtenerTemperaturas } from "./api.js";
-import { pintarGrafico, mostrarCargando, mostrarError, limpiarEstado } from "./render.js";
-const supabaseUrl = 'https://cgdcygewljqtwnmdwznj.supabase.co';
-const supabaseKey = 'sb_publishable_bpfChAqrNiMV0GDQArlEJQ_SYAdA9dT';
+import { buscarCiudad, obtenerTemperaturas } from './api.js';
+import { pintarBoton, mostrarCargando, mostrarError, limpiarResultado } from './ui.js';
+import { guardarFavorito, cargarFavoritos } from './db.js';
 
-// Inicializamos la conexión con Supabase
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-// Prueba de lectura para verificar que la base de datos responde
-async function probarConexion() {
-  const { data, error } = await supabaseClient.from('mediciones').select('*');
-  if (error) {
-    console.error('Error al conectar:', error);
-  } else {
-    console.log('Conexión exitosa a Supabase, datos:', data);
-  }
-}
-
-probarConexion();
-
-
-const $input = document.getElementById("input-ciudad");
-const $boton = document.getElementById("btn-buscar");
+const input = document.getElementById('input-ciudad');
+const btn = document.getElementById('btn-buscar');
+const btnGuardar = document.getElementById('btn-guardar');
+const listaFavoritas = document.getElementById('lista-favoritas');
 
 let cargando = false;
 
+/* La clave que fue ANONIMA en pantalla. Dentro de manejarBúsqueda, la
+   variable 'ciudad' se 'lee' solo y vive dentro de la función. Cuando
+   pulsas guardar no existía, así que la copiamos aquí. */
+let ciudadActual = null;
+
 async function manejarBusqueda() {
-  const consulta = $input.value.trim();
-
-  if (consulta === "") {
-    mostrarError("Escribe el nombre de una ciudad.");
-    return;
-  }
-
-  if (cargando) return;
+  const ciudad = input.value.trim();
+  if (!ciudad) return;
 
   cargando = true;
-  $boton.disabled = true;
-  mostrarCargando(consulta);
+  mostrarCargando(true);
+  limpiarResultado();
 
   try {
-    const ciudad = await buscarCiudad(consulta);
-    const horas = await obtenerTemperaturas(ciudad.lat, ciudad.lon);
+    const datosCiudad = await buscarCiudad(ciudad);
+    if (!datosCiudad) {
+      mostrarError('No se encontró la ciudad');
+      return;
+    }
 
-    limpiarEstado();
-    pintarGrafico(ciudad, horas);
+    ciudadActual = datosCiudad;
+    const temperaturas = await obtenerTemperaturas(datosCiudad.lat, datosCiudad.lon);
+    pintarBoton(datosCiudad.nombre, temperaturas);
   } catch (error) {
-    mostrarError(error.message);
-    console.error(error);
+    mostrarError('Error al obtener los datos');
   } finally {
     cargando = false;
-    $boton.disabled = false;
+    mostrarCargando(false);
   }
 }
 
-$boton.addEventListener("click", manejarBusqueda);
-
-$input.addEventListener("keydown", (evento) => {
-  if (evento.key === "Enter") manejarBusqueda();
+btn.addEventListener('click', manejarBusqueda);
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') manejarBusqueda();
 });
 
-$input.value = "Puerto la cruz";
-manejarBusqueda();
+if (btnGuardar) {
+  btnGuardar.addEventListener('click', async () => {
+    if (ciudadActual) {
+      await guardarFavorito(ciudadActual);
+      if (listaFavoritas) cargarFavoritos(listaFavoritas);
+    }
+  });
+}
+
+if (listaFavoritas) {
+  cargarFavoritos(listaFavoritas);
+}
