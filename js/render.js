@@ -1,44 +1,52 @@
-export function pintarBoton(nombreCiudad, temperaturas) {
+export function pintarBoton(nombre, temperaturas) {
   const resultado = document.getElementById('resultado');
-  const titulo = document.getElementById('titulo-ciudad');
+  const tituloCiudad = document.getElementById('titulo-ciudad');
   const grafico = document.getElementById('grafico');
 
-  // Insertar título y el botón de guardar
-  titulo.innerHTML = `
-    ${nombreCiudad}
+  if (!resultado || !tituloCiudad || !grafico) return;
+
+  // Insertar el nombre de la ciudad y el botón de guardar juntos
+  tituloCiudad.innerHTML = `
+    ${nombre}
     <button id="btn-guardar" class="btn-guardar">Guardar esta ciudad</button>
   `;
 
-  // Renderizar barras del gráfico
+  // Renderizar las barras de temperatura
   grafico.innerHTML = '';
   temperaturas.forEach((temp, index) => {
-    const hora = index < 10 ? `0${index}:00` : `${index}:00`;
     const barra = document.createElement('div');
     barra.className = 'barra';
-    barra.style.height = `${temp * 4}px`;
-    barra.setAttribute('data-temp', `${temp}°`);
-    barra.setAttribute('data-hora', hora);
+
+    const hora = index < 10 ? `0${index}:00` : `${index}:00`;
+    const altura = (temp / 40) * 100; // Porcentaje según temperatura
+
+    barra.innerHTML = `
+      <div class="barra__valor">${Math.round(temp)}°</div>
+      <div class="barra__relleno" style="--altura: ${altura}%; --color: #eab308;"></div>
+      <div class="barra__hora">${hora}</div>
+    `;
+
     grafico.appendChild(barra);
   });
 
   resultado.hidden = false;
 }
 
-export function mostrarCargando(cargando) {
-  const estado = document.getElementById('estado');
-  if (cargando) {
-    estado.textContent = 'Cargando datos...';
-  } else {
-    estado.textContent = '';
+export function mostrarCargando(estado) {
+  const divEstado = document.getElementById('estado');
+  if (divEstado) {
+    divEstado.textContent = estado ? 'Cargando datos...' : '';
   }
 }
 
 export function mostrarError(mensaje) {
-  const estado = document.getElementById('estado');
-  estado.textContent = mensaje;
+  const divEstado = document.getElementById('estado');
+  if (divEstado) {
+    divEstado.textContent = mensaje;
+  }
 }
 
 export function limpiarResultado() {
   const resultado = document.getElementById('resultado');
-  resultado.hidden = true;
+  if (resultado) resultado.hidden = true;
 }
