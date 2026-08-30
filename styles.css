@@ -94,3 +94,45 @@
   }
   
   .barra__hora { font-size: .65rem; color: var(--texto-suave); }
+  .btn-guardar {
+    margin-left: 15px;
+    padding: 6px 12px;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .btn-guardar:hover {
+    background-color: #059669;
+  }
+  
+  .seccion-favoritas {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #1e293b;
+    border-radius: 8px;
+  }
+  
+  .seccion-favoritas h3 {
+    margin-bottom: 10px;
+    color: #f8fafc;
+  }
+  
+  #lista-favoritas {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  #lista-favoritas li {
+    background-color: #334155;
+    color: #f8fafc;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+  }
